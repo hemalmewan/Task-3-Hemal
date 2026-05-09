@@ -1,0 +1,31 @@
+job_role,skills
+Data Scientist,Python SQL Machine_Learning Data_Analysis Statistics TensorFlow Pandas NumPy Matplotlib Scikit_Learn Deep_Learning Jupyter R Data_Visualization
+ML Engineer,Python TensorFlow PyTorch Machine_Learning Deep_Learning Scikit_Learn Docker Kubernetes MLOps Model_Deployment NumPy Pandas Git CI_CD
+Data Analyst,SQL Excel Power_BI Tableau Data_Visualization Python Statistics Pandas Data_Cleaning Reporting Business_Intelligence Google_Sheets
+Backend Developer,Python Java Node.js SQL REST_APIs Docker Git Databases PostgreSQL MongoDB Authentication Microservices Linux
+Frontend Developer,HTML CSS JavaScript React Vue.js TypeScript Git UI_UX Responsive_Design Bootstrap Figma Web_Design
+Full Stack Developer,HTML CSS JavaScript React Node.js Python SQL MongoDB Git Docker REST_APIs TypeScript Linux
+DevOps Engineer,Docker Kubernetes AWS Linux CI_CD Git Jenkins Terraform Automation Bash Shell_Scripting Monitoring Cloud
+Cloud Architect,AWS Azure GCP Cloud Docker Kubernetes Terraform Networking Security Infrastructure Automation DevOps Linux
+Cybersecurity Engineer,Networking Security Linux Python Ethical_Hacking Firewalls Cryptography Penetration_Testing SIEM Compliance
+Mobile Developer,Flutter React_Native Swift Kotlin Java Android iOS Git REST_APIs Firebase UI_UX
+AI Engineer,Python TensorFlow PyTorch NLP Computer_Vision Deep_Learning Machine_Learning Transformers LLMs Hugging_Face Data_Pipelines
+Data Engineer,Python SQL Spark Hadoop Airflow ETL PostgreSQL MongoDB AWS Data_Pipelines Big_Data Kafka
+Blockchain Developer,Solidity Ethereum Smart_Contracts Web3 JavaScript Python Cryptography Distributed_Systems
+Game Developer,Unity C# C++ Unreal_Engine Game_Design 3D_Modelling Physics_Engines OpenGL JavaScript
+Software Engineer,Python Java C++ Algorithms Data_Structures Git OOP Testing Debugging System_Design REST_APIs
+Systems Administrator,Linux Windows_Server Networking Shell_Scripting Virtualization Active_Directory IT_Support Monitoring Backup Security
+Database Administrator,SQL PostgreSQL MySQL MongoDB Database_Design Query_Optimization Backup Recovery Performance_Tuning Linux
+Network Engineer,Networking Cisco Routing Switching Firewalls Linux VPN Cloud Security TCP_IP DNS
+Embedded Systems Engineer,C C++ Arduino Raspberry_Pi RTOS Microcontrollers Hardware_Programming Assembly Linux IoT
+NLP Engineer,Python NLP Transformers Hugging_Face BERT GPT Text_Classification Sentiment_Analysis TensorFlow PyTorch Linguistics
+Computer Vision Engineer,Python OpenCV TensorFlow PyTorch Deep_Learning Image_Processing CNNs Object_Detection YOLO Data_Augmentation
+Business Intelligence Developer,SQL Power_BI Tableau Data_Visualization ETL Python Excel Reporting Data_Warehousing Statistics
+Robotics Engineer,Python C++ ROS Robotics Control_Systems Machine_Learning Sensors Automation Hardware_Programming Linux
+Quantitative Analyst,Python R SQL Statistics Machine_Learning Mathematics Finance Data_Analysis Pandas NumPy
+Product Manager,Agile Scrum Product_Strategy Data_Analysis Communication SQL Figma User_Research Roadmapping Stakeholder_Management
+UX Designer,Figma UI_UX User_Research Wireframing Prototyping Adobe_XD CSS HTML Usability_Testing Design_Thinking
+Site Reliability Engineer,Linux Docker Kubernetes Python Monitoring CI_CD Cloud Automation Git Networking Performance
+AR_VR Developer,Unity C# Unreal_Engine 3D_Modelling AR VR OpenGL JavaScript Computer_Vision Python
+IoT Developer,Python C Arduino Raspberry_Pi MQTT Cloud AWS Networking Embedded_Systems Sensors Linux
+Scrum Master,Agile Scrum Project_Management Communication Jira Confluence Team_Leadership Risk_Management Retrospectives
