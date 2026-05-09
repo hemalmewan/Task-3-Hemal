@@ -1,3 +1,36 @@
+"""
+DecodeLabs - Project 3 | Tech Stack Recommender
+================================================
+
+A simple, dependency-free career-path recommender that maps a user's skill set
+to the closest matching job roles using a classic TF-IDF + cosine similarity
+pipeline.
+
+Pipeline Overview
+-----------------
+    1. Ingestion  - Load job roles and their skills from a CSV dataset and
+                    capture the user's skills via the console.
+    2. Scoring    - Convert every role and the user profile into a TF-IDF
+                    weighted vector and compute cosine similarity.
+    3. Sorting    - Rank roles by similarity score in descending order.
+    4. Filtering  - Return the Top-N most relevant roles (with a Cold Start
+                    fallback when the user provides no recognised skills).
+
+Inputs
+------
+    data/raw_skills.csv : CSV with columns ``job_role`` and ``skills``,
+                          where ``skills`` is a whitespace-separated list.
+
+Usage
+-----
+    Run as a script::
+
+        python recommender.py
+
+    The user is prompted for at least three comma-separated skills and the
+    Top-3 matching roles are printed with similarity scores.
+"""
+
 ##========================
 ## Import Required Libraries
 ##========================
@@ -19,7 +52,19 @@ DATA_FILE = PROJECT_DIR / "data/raw_skills.csv"
 ## STEP 1: LOAD DATASET (Ingestion - Data Side)
 ##===============================================
 def load_dataset(filepath):
-    """Load job roles and their skills from CSV."""
+    """Load job roles and their associated skills from a CSV file.
+
+    The CSV is expected to have two columns:
+        - ``job_role`` : the name/title of the role.
+        - ``skills``   : a whitespace-separated string of skill tokens.
+
+    Args:
+        filepath (str | pathlib.Path): Path to the source CSV file.
+
+    Returns:
+        dict[str, list[str]]: A mapping of ``job_role`` to a list of skill
+        tokens (e.g. ``{"Data Scientist": ["Python", "SQL", "Statistics"]}``).
+    """
     dataset = {}
     with open(filepath, newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
@@ -34,7 +79,19 @@ def load_dataset(filepath):
 ## STEP 2: BUILD VOCABULARY
 ##===============================================
 def build_vocabulary(dataset):
-    """Create a unified vocabulary of all unique skills."""
+    """Build a sorted vocabulary of every unique skill across all roles.
+
+    The vocabulary defines a fixed term ordering that is later used to align
+    TF-IDF vectors so they are directly comparable across roles and the user
+    profile.
+
+    Args:
+        dataset (dict[str, list[str]]): Mapping of role name to a list of
+            skill tokens, as produced by :func:`load_dataset`.
+
+    Returns:
+        list[str]: Alphabetically sorted list of unique skill tokens.
+    """
     vocab = set()
     for skills in dataset.values():
         vocab.update(skills)
@@ -45,7 +102,21 @@ def build_vocabulary(dataset):
 ## STEP 3: COMPUTE TF (Term Frequency)
 ##===============================================
 def compute_tf(skill_list):
-    """TF = count of skill / total skills in role."""
+    """Compute the Term Frequency (TF) for each skill in a single document.
+
+    TF is defined as::
+
+        TF(skill) = (occurrences of skill in document) / (total skills in document)
+
+    A "document" here is the full skill list for one role (or the user).
+
+    Args:
+        skill_list (list[str]): Skills belonging to a single role or user.
+
+    Returns:
+        dict[str, float]: Mapping of each skill present in ``skill_list`` to
+        its normalised term frequency (a value in ``[0, 1]``).
+    """
     tf = {}
     total = len(skill_list)
     for skill in skill_list:
@@ -59,7 +130,21 @@ def compute_tf(skill_list):
 ## STEP 4: COMPUTE IDF (Inverse Document Frequency)
 ##===============================================
 def compute_idf(dataset):
-    """IDF = log(Total Docs / Docs containing term)."""
+    """Compute the Inverse Document Frequency (IDF) for every skill.
+
+    IDF down-weights skills that appear in many roles (common, low-signal)
+    and up-weights skills that appear in few roles (rare, high-signal)::
+
+        IDF(skill) = log( total_roles / roles_containing_skill )
+
+    Args:
+        dataset (dict[str, list[str]]): Mapping of role name to its skill
+            list. Each role is treated as a single "document".
+
+    Returns:
+        dict[str, float]: Mapping of each skill in the corpus to its IDF
+        weight. Skills present in every role yield an IDF of ``0.0``.
+    """
     total_docs = len(dataset)
     idf = {}
     all_skills = set()
@@ -76,7 +161,24 @@ def compute_idf(dataset):
 ## STEP 5: COMPUTE TF-IDF VECTOR
 ##===============================================
 def compute_tfidf_vector(skill_list, idf, vocabulary):
-    """Create a TF-IDF weighted vector for a skill list."""
+    """Build a fixed-length TF-IDF weighted vector for a skill list.
+
+    Each component of the returned vector corresponds to a term in
+    ``vocabulary`` (in the same order), making the vectors of different
+    documents directly comparable. Each component is computed as::
+
+        vector[i] = TF(term_i) * IDF(term_i)
+
+    Args:
+        skill_list (list[str]): Skills for a single role or for the user.
+        idf (dict[str, float]): IDF weights produced by :func:`compute_idf`.
+        vocabulary (list[str]): Ordered list of all known skills, as
+            produced by :func:`build_vocabulary`.
+
+    Returns:
+        list[float]: A vector of length ``len(vocabulary)`` with TF-IDF
+        weights. Terms missing from the document or the IDF table are 0.
+    """
     tf = compute_tf(skill_list)
     vector = []
     for term in vocabulary:
@@ -90,7 +192,22 @@ def compute_tfidf_vector(skill_list, idf, vocabulary):
 ## STEP 6: COSINE SIMILARITY
 ##===============================================
 def cosine_similarity(vec_a, vec_b):
-    """cos(θ) = (A · B) / (||A|| * ||B||)"""
+    """Compute cosine similarity between two equal-length vectors.
+
+    The metric measures the cosine of the angle between two vectors and is
+    therefore independent of their magnitudes::
+
+        cos(theta) = (A . B) / (||A|| * ||B||)
+
+    Args:
+        vec_a (list[float]): First vector (e.g. user TF-IDF profile).
+        vec_b (list[float]): Second vector (e.g. role TF-IDF profile).
+
+    Returns:
+        float: Similarity in the range ``[0.0, 1.0]`` for non-negative
+        vectors. Returns ``0.0`` if either vector has zero magnitude
+        (the Cold Start fallback case).
+    """
     dot_product = sum(a * b for a, b in zip(vec_a, vec_b))
     magnitude_a = math.sqrt(sum(a ** 2 for a in vec_a))
     magnitude_b = math.sqrt(sum(b ** 2 for b in vec_b))
@@ -104,12 +221,28 @@ def cosine_similarity(vec_a, vec_b):
 ## STEP 7: RECOMMEND (Scoring + Sorting + Filtering)
 ##===============================================
 def recommend(user_skills, dataset, top_n=3):
-    """
-    Full 4-Step Pipeline:
-    1. Ingestion   - user skills captured
-    2. Scoring     - cosine similarity per role
-    3. Sorting     - descending order by score
-    4. Filtering   - return Top-N results
+    """Recommend the Top-N best-matching job roles for a user.
+
+    Implements the full 4-step pipeline:
+        1. Ingestion - user skills are accepted as input.
+        2. Scoring   - the user profile and every role are converted to
+                       TF-IDF vectors and compared via cosine similarity.
+        3. Sorting   - roles are ranked by similarity in descending order.
+        4. Filtering - the top ``top_n`` roles are printed to the console.
+
+    A Cold Start fallback is triggered when none of the user's skills
+    appear in the corpus vocabulary (the user vector is all zeros). In
+    that case the function prints a list of trending/default roles instead
+    of similarity-based matches.
+
+    Args:
+        user_skills (list[str]): Skills supplied by the user.
+        dataset (dict[str, list[str]]): Mapping of role to its skill list.
+        top_n (int, optional): Number of roles to display. Defaults to 3.
+
+    Returns:
+        None: Results are printed to standard output as a formatted report;
+        nothing is returned to the caller.
     """
     vocabulary = build_vocabulary(dataset)
     idf = compute_idf(dataset)
@@ -152,6 +285,19 @@ def recommend(user_skills, dataset, top_n=3):
 ## MAIN PROGRAM
 ##===============================================
 def main():
+    """Entry point for the command-line recommender experience.
+
+    Steps performed:
+        1. Loads the dataset from :data:`DATA_FILE`.
+        2. Builds the skill vocabulary and reports its size.
+        3. Prompts the user for at least three comma-separated skills,
+           normalising spaces to underscores so multi-word skills match
+           the dataset format (e.g. ``Machine Learning`` -> ``Machine_Learning``).
+        4. Invokes :func:`recommend` to print the Top-3 matching roles.
+
+    Returns:
+        None: The function only performs I/O and has no return value.
+    """
     print("=" * 50)
     print("  🤖  DecodeLabs - Tech Stack Recommender")
     print("      Project 3 | AI Recommendation Logic")
